@@ -9,9 +9,10 @@ azure_api_key = st.sidebar.text_input("Azure OpenAI Key", type="password")
 deployment = st.sidebar.text_input("Deployment Name (e.g. gpt-4o)")
 
 def generate_response(prompt):
-    client = OpenAI(
+    client = AzureOpenAI(
         api_key=azure_api_key,
         base_url=f"{azure_endpoint}/openai/deployments/{deployment}",
+        api_version="2024-12-01-preview"
     )
 
     response = client.chat.completions.create(
