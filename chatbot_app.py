@@ -21,7 +21,6 @@ AZURE_OPENAI_DEPLOYMENT = st.text_input("Deployment name (model)", placeholder="
 def make_client(key: str, base: str):
     return OpenAI(
         api_key=key,
-        api_base=base,
         api_type="azure",
         api_version="2025-01-01-preview"  # or the API version your resource requires
     )
