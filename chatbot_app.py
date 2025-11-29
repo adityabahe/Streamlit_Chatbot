@@ -11,7 +11,8 @@ deployment = st.sidebar.text_input("Deployment Name")  # e.g., gpt-4o
 def generate_response(prompt):
     client = OpenAI(
         api_key=azure_api_key,
-        base_url=f"{azure_endpoint}/openai/deployments/{deployment}"
+        base_url=f"{azure_endpoint}/openai/deployments/{deployment}/chat/completions?api-version=2025-01-01-preview"
+        # api_version = "2024-12-01-preview"
     )
 
     response = client.chat.completions.create(
