@@ -1,5 +1,5 @@
 import streamlit as st
-from openai import OpenAI
+from openai import AzureOpenAI
 
 st.title("🤖 Azure OpenAI Chatbot (Minimal)")
 
