@@ -1,5 +1,5 @@
-streamlit
-openai
-langchain
-langchain-openai
-azure-openai
+streamlit==1.51.0
+langchain==1.1.0
+langchain-openai==1.1.0
+openai>=1.0.0
+python-dotenv

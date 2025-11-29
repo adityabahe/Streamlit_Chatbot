@@ -1,40 +1,65 @@
+# chatbot_app.py
 import streamlit as st
-from openai import AzureOpenAI
+from langchain_openai import AzureChatOpenAI   # LangChain Azure wrapper
+from dotenv import load_dotenv
+import os
 
-st.title("🤖 Azure OpenAI Chatbot (Streamlit)")
+load_dotenv()  # optional if you use a .env
 
-# Sidebar: Azure settings
+st.set_page_config(page_title="Azure OpenAI Chatbot")
+st.title("🦜🔗 Azure OpenAI Quickstart")
+
+# collect Azure credentials (sidebar)
 azure_endpoint = st.sidebar.text_input(
     "Azure OpenAI Endpoint",
-    placeholder="https://openai-genesis-poc-swedencentral.openai.azure.com/"
+    placeholder="https://<your-resource>.openai.azure.com/",
+    value=os.getenv("AZURE_OPENAI_ENDPOINT", ""),
 )
-azure_api_key = st.sidebar.text_input("Azure OpenAI Key", type="password")
-azure_deployment = st.sidebar.text_input("Deployment Name", placeholder="test-gpt4o-mini")
+azure_key = st.sidebar.text_input(
+    "Azure OpenAI Key",
+    type="password",
+    value=os.getenv("AZURE_OPENAI_KEY", ""),
+)
+deployment = st.sidebar.text_input(
+    "Deployment Name",
+    placeholder="your-deployment-name",
+    value=os.getenv("AZURE_OPENAI_DEPLOYMENT", ""),
+)
+api_version = st.sidebar.text_input(
+    "API Version (optional)",
+    value=os.getenv("AZURE_OPENAI_API_VERSION", "2024-10-01")
+)
 
-def generate_response(input_text):
-    response = client.chat.completions.create(
-        model=DEPLOYMENT_NAME,
-        messages=[{"role": "user", "content": input_text}]
-    )
+# simple helper
+def generate_response(input_text: str) -> str:
+    # validate
+    if not (azure_endpoint and azure_key and deployment):
+        raise ValueError("Fill Azure endpoint, key and deployment name in the sidebar.")
 
-    reply = response.choices[0].message.content
-    st.info(reply)
-
-    response = client.chat.completions.create(
-        model=azure_deployment,     # your Azure deployment name
-        messages=[{"role": "user", "content": user_input}],
+    model = AzureChatOpenAI(
+        deployment_name=deployment,
+        openai_api_base=azure_endpoint,
+        openai_api_key=azure_key,
+        openai_api_version=api_version,
         temperature=0.7,
     )
+    # .invoke returns a string (LangChain wrapper)
+    return model.invoke(input_text)
 
-    st.info(response.choices[0].message["content"])
+# chat form
+with st.form("my_form"):
+    user_text = st.text_area(
+        "Enter text:",
+        "What are the three key pieces of advice for learning how to code?",
+    )
+    submitted = st.form_submit_button("Submit")
 
-
-with st.form("input_form"):
-    user_text = st.text_area("Enter your question:", value="Tell me a fun fact!")
-    submitted = st.form_submit_button("Send")
-
-    if submitted:
-        if not azure_api_key or not azure_endpoint or not azure_deployment:
-            st.warning("Please fill all Azure OpenAI fields!", icon="⚠")
-        else:
-            generate_response(user_text)
+if submitted:
+    if not azure_key:
+        st.warning("Please enter your Azure OpenAI Key in the sidebar.", icon="⚠")
+    else:
+        try:
+            reply = generate_response(user_text)
+            st.success(reply)
+        except Exception as e:
+            st.error(f"Error: {e}")s
