@@ -11,12 +11,14 @@ azure_endpoint = st.sidebar.text_input(
 azure_api_key = st.sidebar.text_input("Azure OpenAI Key", type="password")
 azure_deployment = st.sidebar.text_input("Deployment Name", placeholder="test-gpt4o-mini")
 
-def generate_response(user_input: str):
-    client = AzureOpenAI(
-        api_key=azure_api_key,
-        azure_endpoint=azure_endpoint,
-        api_version="2025-01-01-preview",
+def generate_response(input_text):
+    response = client.chat.completions.create(
+        model=DEPLOYMENT_NAME,
+        messages=[{"role": "user", "content": input_text}]
     )
+
+    reply = response.choices[0].message.content
+    st.info(reply)
 
     response = client.chat.completions.create(
         model=azure_deployment,     # your Azure deployment name
